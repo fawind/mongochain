@@ -1,0 +1,22 @@
+group 'org.ipfs-store'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.google.inject:guice:4.1.+'
+    compile 'com.google.guava:guava:22.+'
+    compile 'com.github.ipfs:java-ipfs-api:v1.2.0'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.jukito:jukito:1.0'
+    testCompile 'org.assertj:assertj-core:3.6.+'
+    testCompile 'org.mockito:mockito-core:1.+'
+}
