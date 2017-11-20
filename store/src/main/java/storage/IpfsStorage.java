@@ -1,19 +1,33 @@
 package storage;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import io.ipfs.api.IPFS;
+import io.ipfs.api.MerkleNode;
+import io.ipfs.api.NamedStreamable;
+import io.ipfs.multihash.Multihash;
 
-/**
- * TODO: Implement interface using ipfs.
- */
+import javax.inject.Inject;
+import java.io.IOException;
+
 public class IpfsStorage implements ContentAddressableStorage {
 
-    @Override
-    public String put(String content) {
-        throw new NotImplementedException();
+    private final IPFS ipfs;
+
+    @Inject
+    public IpfsStorage(IPFS ipfs) {
+        this.ipfs = ipfs;
     }
 
     @Override
-    public String cat(String contentHash) {
-        throw new NotImplementedException();
+    public String put(String content) throws IOException {
+        final NamedStreamable.ByteArrayWrapper byteContent = new NamedStreamable.ByteArrayWrapper(content.getBytes());
+        final MerkleNode addResult = ipfs.add(byteContent).get(0);
+        return addResult.hash.toString();
+    }
+
+    @Override
+    public String cat(String contentHash) throws IOException {
+        final Multihash filePointer = Multihash.fromBase58(contentHash);
+        final byte[] fileContents = ipfs.cat(filePointer);
+        return new String(fileContents);
     }
 }

@@ -1,10 +1,15 @@
 language: java
 jdk:
   - oraclejdk8
+before_install:
+  - wget https://dist.ipfs.io/go-ipfs/v0.4.13/go-ipfs_v0.4.13_linux-amd64.tar.gz
+  - tar -xvzf go-ipfs_v0.4.13_linux-amd64.tar.gz
+  - go-ipfs/ipfs init
+  - go-ipfs/ipfs daemon &
 install:
   - gradle -p ./store build
 script:
-  - gradle -p ./store check
+  - gradle -p ./store clean test integrationTest
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

@@ -1,5 +1,7 @@
 package storage;
 
+import java.io.IOException;
+
 public interface ContentAddressableStorage {
 
     /**
@@ -8,7 +10,7 @@ public interface ContentAddressableStorage {
      * @param content the content to add to the storage
      * @return the content hash used to address the content
      */
-    String put(final String content);
+    String put(final String content) throws IOException;
 
     /**
      * Returns the content of the given content hash.
@@ -16,5 +18,5 @@ public interface ContentAddressableStorage {
      * @param contentHash the content hash of the content to retrieve
      * @return the content addressed by the content hash
      */
-    String cat(final String contentHash);
+    String cat(final String contentHash) throws IOException;
 }

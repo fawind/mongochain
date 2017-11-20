@@ -1,7 +1,18 @@
 group 'org.ipfs-store'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.2'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.unbroken-dome.test-sets'
 
 sourceCompatibility = 1.8
 
@@ -9,6 +20,11 @@ repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
+
+testSets {
+    integrationTest
+}
+integrationTest.mustRunAfter test
 
 dependencies {
     compile 'com.google.inject:guice:4.1.+'

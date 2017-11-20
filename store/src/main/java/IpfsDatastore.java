@@ -3,6 +3,7 @@ import pubsub.PubSubService;
 import storage.ContentAddressableStorage;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class IpfsDatastore implements Datastore {
 
@@ -22,17 +23,30 @@ public class IpfsDatastore implements Datastore {
 
     @Override
     public void add(String namespace, String key, String value) {
-        String contentHash = this.storage.put(value);
-        index.put(namespace, key, contentHash);
-        pubSubService.publish(namespace, key, contentHash);
+        try {
+            String contentHash = this.storage.put(value);
+            index.put(namespace, key, contentHash);
+            pubSubService.publish(namespace, key, contentHash);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // TODO handle failure of storage.put
+        }
+
     }
 
     @Override
     public String get(String namespace, String key) {
         if (!index.contains(namespace, key)) {
+            // TODO handle namespace->key not found in index
             return null;
         }
         String contentHash = index.get(namespace, key);
-        return storage.cat(contentHash);
+        try {
+            return storage.cat(contentHash);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // TODO handle failure of storage.get
+            return "";
+        }
     }
 }
