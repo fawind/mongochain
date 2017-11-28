@@ -1,11 +1,8 @@
 package pubsub;
 
-public interface PubSubService {
+import java.io.IOException;
 
-    /**
-     * TODO: Rough outline of our pubsub service. Change this to work with IPFS pubsub:
-     * https://github.com/ipfs/java-ipfs-api/blob/master/src/main/java/io/ipfs/api/IPFS.java#L225
-     */
+public interface PubSubService {
 
     /**
      * Publish the new content hash for the namespace and key.
@@ -14,8 +11,9 @@ public interface PubSubService {
      * @param key the key of the content hash
      * @param contentHash the inserted content hash to publish
      */
-    void publish(String namespace, String key, String contentHash);
+    void publish(String namespace, String key, String contentHash) throws IOException;
 
-    // TODO: Specify this interface
-    void subscribe();
+    void subscribe() throws IOException;
+    
+    String retrieveData();
 }

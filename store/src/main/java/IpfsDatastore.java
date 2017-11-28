@@ -31,7 +31,6 @@ public class IpfsDatastore implements Datastore {
             e.printStackTrace();
             // TODO handle failure of storage.put
         }
-
     }
 
     @Override
@@ -45,8 +44,7 @@ public class IpfsDatastore implements Datastore {
             return storage.cat(contentHash);
         } catch (IOException e) {
             e.printStackTrace();
-            // TODO handle failure of storage.get
-            return "";
+            return null;
         }
     }
 }

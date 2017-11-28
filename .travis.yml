@@ -5,7 +5,7 @@ before_install:
   - wget https://dist.ipfs.io/go-ipfs/v0.4.13/go-ipfs_v0.4.13_linux-amd64.tar.gz
   - tar -xvzf go-ipfs_v0.4.13_linux-amd64.tar.gz
   - go-ipfs/ipfs init
-  - go-ipfs/ipfs daemon &
+  - go-ipfs/ipfs daemon --enable-pubsub-experiment &
 install:
   - gradle -p ./store build
 script:
