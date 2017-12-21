@@ -1,3 +1,5 @@
+package datastore;
+
 public interface Datastore {
 
     /**

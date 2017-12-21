@@ -1,5 +1,8 @@
 package pubsub;
 
+import io.reactivex.Observable;
+import model.TransactionMessage;
+
 import java.io.IOException;
 
 public interface PubSubService {
@@ -13,7 +16,5 @@ public interface PubSubService {
      */
     void publish(String namespace, String key, String contentHash) throws IOException;
 
-    void subscribe() throws IOException;
-    
-    String retrieveData();
+    Observable<TransactionMessage> observe() throws IOException;
 }

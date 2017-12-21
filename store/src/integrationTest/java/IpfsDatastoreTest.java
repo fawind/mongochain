@@ -1,3 +1,5 @@
+import configuration.DatastoreModule;
+import datastore.IpfsDatastore;
 import index.ContentHashIndex;
 import index.InMemoryContentHashIndex;
 import io.ipfs.api.IPFS;
@@ -5,6 +7,8 @@ import org.jukito.JukitoModule;
 import org.jukito.JukitoRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import pubsub.IpfsPubSubService;
+import pubsub.PubSubService;
 import storage.ContentAddressableStorage;
 import storage.IpfsStorage;
 
@@ -17,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IpfsDatastoreTest {
 
     private static final String LOCAL_IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";
+    private static final String PUBSUB_TOPIC = "ipfs-store-node";
 
     public static class Module extends JukitoModule {
         @Override
@@ -24,6 +29,8 @@ public class IpfsDatastoreTest {
             bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class);
             bind(ContentAddressableStorage.class).to(IpfsStorage.class);
             bind(IPFS.class).toInstance(new IPFS(LOCAL_IPFS_ADDRESS));
+            bind(PubSubService.class).to(IpfsPubSubService.class);
+            bindConstant().annotatedWith(DatastoreModule.PubsubTopic.class).to(PUBSUB_TOPIC);
         }
     }
 

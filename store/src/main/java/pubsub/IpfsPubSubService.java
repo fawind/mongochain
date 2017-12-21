@@ -1,15 +1,23 @@
 package pubsub;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import io.ipfs.api.IPFS;
-
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Map;
-import java.util.function.Supplier;
 
 import static configuration.DatastoreModule.PubsubTopic;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import io.ipfs.api.IPFS;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import model.TransactionMessage;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class IpfsPubSubService implements PubSubService {
 
@@ -25,26 +33,28 @@ public class IpfsPubSubService implements PubSubService {
 
     @Override
     public void publish(final String namespace, final String key, final String contentHash) throws IOException {
-        pubsub.pub(topic, String.join("|", ImmutableList.of(namespace, key, contentHash)));
+        String msg = new TransactionMessage(namespace, key, contentHash).serializeToString();
+        pubsub.pub(topic, URLEncoder.encode(msg, UTF_8.name()));
     }
 
     @Override
-    public void subscribe() throws IOException {
+    public Observable<TransactionMessage> observe() throws IOException {
         supplier = pubsub.sub(topic);
         
         /**
          * Poll supplier due to empty map initialization
          */
         supplier.get();
+        return Observable.interval(1, TimeUnit.SECONDS, Schedulers.io())
+                .map(tick -> getMessage())
+                .doOnError(System.out::println)
+                .retry();
     }
 
-    @Override
-    public String retrieveData() {
-        Map<String, String> message = retrieveMessage(topic);
-        return new String(Base64.getDecoder().decode(message.get("data")));
-    }
-
-    private Map<String, String> retrieveMessage(final String topic) {
-        return (Map<String, String>) supplier.get();
+    private TransactionMessage getMessage() throws UnsupportedEncodingException {
+        Map<String, String> messageObject = (Map<String, String>) supplier.get();
+        String decodedMessage = new String(Base64.getDecoder().decode(
+                URLDecoder.decode(messageObject.get("data"), UTF_8.name())));
+        return TransactionMessage.deserializeFromString(decodedMessage);
     }
 }

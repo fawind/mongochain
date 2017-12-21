@@ -9,7 +9,7 @@ before_install:
 install:
   - gradle -p ./store build
 script:
-  - gradle -p ./store clean test integrationTest
+  - gradle -p ./store clean test
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

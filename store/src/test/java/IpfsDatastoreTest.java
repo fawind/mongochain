@@ -1,6 +1,7 @@
+import datastore.IpfsDatastore;
 import index.ContentHashIndex;
 import index.InMemoryContentHashIndex;
-import io.ipfs.api.IPFS;
+import io.reactivex.Observable;
 import org.jukito.JukitoModule;
 import org.jukito.JukitoRunner;
 import org.junit.Test;
@@ -21,9 +22,12 @@ public class IpfsDatastoreTest {
     public static class Module extends JukitoModule {
         @Override
         protected void configureTest() {
+            PubSubService mockPubsubService = mock(PubSubService.class);
+            try {
+                when(mockPubsubService.observe()).thenReturn(Observable.empty());
+            } catch (IOException ignored) { }
             bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class);
-            bind(PubSubService.class).toInstance(mock(PubSubService.class));
-            bind(IPFS.class).toInstance(mock(IPFS.class));
+            bind(PubSubService.class).toInstance(mockPubsubService);
         }
     }
 

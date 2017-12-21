@@ -4,15 +4,19 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:1.4.2'
+        classpath 'org.akhikhl.gretty:gretty:+'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.unbroken-dome.test-sets'
+apply plugin: 'war'
+apply plugin: 'org.akhikhl.gretty'
 
 sourceCompatibility = 1.8
 
@@ -26,10 +30,20 @@ testSets {
 }
 integrationTest.mustRunAfter test
 
+gretty {
+    httpPort = project.hasProperty("httpPort") ? project.httpPort as int : 9090
+}
+
 dependencies {
+    compile 'org.apache.commons:commons-lang3:3.7'
     compile 'com.google.inject:guice:4.1.+'
     compile 'com.google.guava:guava:22.+'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.+'
     compile 'com.github.ipfs:java-ipfs-api:v1.2.0'
+
+    compile 'org.jboss.resteasy:resteasy-jaxrs:3.1.+'
+    compile 'org.jboss.resteasy:resteasy-guice:3.1.+'
+    compile 'org.jboss.resteasy:resteasy-jackson2-provider:3.1.+'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.jukito:jukito:1.0'
