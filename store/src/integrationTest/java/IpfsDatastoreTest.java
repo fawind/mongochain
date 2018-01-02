@@ -19,10 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(JukitoRunner.class)
 public class IpfsDatastoreTest {
-
+    
     private static final String LOCAL_IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";
     private static final String PUBSUB_TOPIC = "ipfs-store-node";
-
+    
     public static class Module extends JukitoModule {
         @Override
         protected void configureTest() {
@@ -33,9 +33,10 @@ public class IpfsDatastoreTest {
             bindConstant().annotatedWith(DatastoreModule.PubsubTopic.class).to(PUBSUB_TOPIC);
         }
     }
-
-    @Inject private IpfsDatastore ipfsDatastore;
-
+    
+    @Inject
+    private IpfsDatastore ipfsDatastore;
+    
     @Test
     public void givenKeyAndValue_whenAdd_thenRetrieveValueForKey() {
         // GIVEN
@@ -43,11 +44,11 @@ public class IpfsDatastoreTest {
         final String key = "key";
         final Random randomGenerator = new Random();
         final String value = String.valueOf(randomGenerator.nextInt(1000));
-
+        
         // WHEN
         ipfsDatastore.add(namespace, key, value);
         String savedValue = ipfsDatastore.get(namespace, key);
-
+        
         assertThat(savedValue).isEqualTo(value);
     }
 }

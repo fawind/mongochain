@@ -12,6 +12,7 @@ import storage.ContentAddressableStorage;
 import javax.inject.Inject;
 import java.io.IOException;
 
+import static configuration.DatastoreModule.PubsubTopic;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,10 +25,11 @@ public class IpfsDatastoreTest {
         protected void configureTest() {
             PubSubService mockPubsubService = mock(PubSubService.class);
             try {
-                when(mockPubsubService.observe()).thenReturn(Observable.empty());
+                when(mockPubsubService.observe("test")).thenReturn(Observable.empty());
             } catch (IOException ignored) { }
             bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class);
             bind(PubSubService.class).toInstance(mockPubsubService);
+            bindConstant().annotatedWith(PubsubTopic.class).to("test");
         }
     }
 

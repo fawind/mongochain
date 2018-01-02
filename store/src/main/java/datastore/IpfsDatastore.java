@@ -8,7 +8,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import static configuration.DatastoreModule.PubsubTopic;
 import static java.lang.String.format;
+
 
 public class IpfsDatastore implements Datastore {
 
@@ -17,12 +19,15 @@ public class IpfsDatastore implements Datastore {
     private final ContentAddressableStorage storage;
     private final ContentHashIndex index;
     private final PubSubService pubSubService;
-
+    private final String topic;
+    
     @Inject
     public IpfsDatastore(
             ContentAddressableStorage storage,
             ContentHashIndex index,
-            PubSubService pubSubService) {
+            PubSubService pubSubService,
+            @PubsubTopic String topic) {
+        this.topic = topic;
         this.storage = storage;
         this.index = index;
         this.pubSubService = pubSubService;
@@ -35,7 +40,7 @@ public class IpfsDatastore implements Datastore {
         try {
             String contentHash = this.storage.put(value);
             index.put(namespace, key, contentHash);
-            pubSubService.publish(namespace, key, contentHash);
+            pubSubService.publish(topic, namespace, key, contentHash);
             log.info(format("ADD: %s/%s: %s", namespace, key, value));
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,7 +67,7 @@ public class IpfsDatastore implements Datastore {
 
     private void listenToIndexUpdates() {
         try {
-            pubSubService.observe().subscribe(transaction -> {
+            pubSubService.observe(topic).subscribe(transaction -> {
                 index.put(transaction.getNamespace(), transaction.getKey(), transaction.getContentHash());
                 log.info(format("SUB: %s/%s: %s", transaction.getNamespace(), transaction.getKey(), transaction.getContentHash()));
             });
