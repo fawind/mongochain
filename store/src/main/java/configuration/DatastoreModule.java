@@ -19,8 +19,6 @@ import java.lang.annotation.RetentionPolicy;
 
 public class DatastoreModule extends AbstractModule {
 
-    // TODO: Move to config file
-    private static final String IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";
     private static final String PUBSUB_TOPIC = "ipfs-store-node";
 
     @Override
@@ -35,7 +33,7 @@ public class DatastoreModule extends AbstractModule {
     @Provides
     @Singleton
     public IPFS getIpfsService() {
-        return new IPFS(IPFS_ADDRESS);
+        return new IPFSLoader().getIPFS();
     }
 
     @BindingAnnotation @Retention(RetentionPolicy.RUNTIME)

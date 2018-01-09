@@ -1,4 +1,5 @@
 import com.google.inject.Inject;
+import configuration.IPFSLoader;
 import io.ipfs.api.IPFS;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -16,14 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(JukitoRunner.class)
 public class IpfsPubSubServiceTest {
-
-    private static final String LOCAL_IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";
+    
     private static final String PUBSUB_TOPIC = "ipfs-test-topic";
 
     public static class Module extends JukitoModule {
         @Override
         protected void configureTest() {
-            bind(IPFS.class).toInstance(new IPFS(LOCAL_IPFS_ADDRESS));
+            bind(IPFS.class).toInstance(new IPFSLoader().getIPFS());
             bindConstant().annotatedWith(PubsubTopic.class).to(PUBSUB_TOPIC);
         }
     }
