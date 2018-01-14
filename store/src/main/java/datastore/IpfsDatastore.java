@@ -1,78 +1,64 @@
 package datastore;
 
+import cluster.ConsensusService;
 import index.ContentHashIndex;
-import pubsub.PubSubService;
+import model.DatastoreException;
+import model.Key;
+import model.Transaction;
 import storage.ContentAddressableStorage;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import static configuration.DatastoreModule.PubsubTopic;
 import static java.lang.String.format;
 
 
 public class IpfsDatastore implements Datastore {
 
-    private static Logger log = Logger.getLogger(IpfsDatastore.class.getName());
-
     private final ContentAddressableStorage storage;
     private final ContentHashIndex index;
-    private final PubSubService pubSubService;
-    private final String topic;
-    
+    private final TransactionBacklog transactionBacklog;
+    private final SecuredTransactionLog transactionLog;
+
     @Inject
     public IpfsDatastore(
             ContentAddressableStorage storage,
             ContentHashIndex index,
-            PubSubService pubSubService,
-            @PubsubTopic String topic) {
-        this.topic = topic;
+            TransactionBacklog transactionBacklog,
+            ConsensusService consensusService,
+            SecuredTransactionLog transactionLog) {
         this.storage = storage;
         this.index = index;
-        this.pubSubService = pubSubService;
-
-        listenToIndexUpdates();
+        this.transactionBacklog = transactionBacklog;
+        this.transactionLog = transactionLog;
+        consensusService.start(this::onConsensus);
     }
 
     @Override
-    public void add(String namespace, String key, String value) {
+    public void add(Key key, String value) throws DatastoreException {
         try {
             String contentHash = this.storage.put(value);
-            index.put(namespace, key, contentHash);
-            pubSubService.publish(topic, namespace, key, contentHash);
-            log.info(format("ADD: %s/%s: %s", namespace, key, value));
+            transactionBacklog.addTransaction(new Transaction(key, contentHash));
         } catch (IOException e) {
-            e.printStackTrace();
-            // TODO handle failure of storage.put
+            throw new DatastoreException(format("Error adding key, value: %s: %s", key, value), e);
         }
     }
 
     @Override
-    public String get(String namespace, String key) {
-        if (!index.contains(namespace, key)) {
-            log.info(format("GET: %s/%s: null", namespace, key));
+    public String get(Key key) throws DatastoreException {
+        if (!index.contains(key)) {
             return null;
         }
-        String contentHash = index.get(namespace, key);
+        String contentHash = index.get(key);
         try {
-            String value = storage.cat(contentHash);
-            log.info(format("GET: %s/%s: %s", namespace, key, value));
-            return value;
+            return storage.cat(contentHash);
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new DatastoreException(format("Error getting key %s", key), e);
         }
     }
 
-    private void listenToIndexUpdates() {
-        try {
-            pubSubService.observe(topic).subscribe(transaction -> {
-                index.put(transaction.getNamespace(), transaction.getKey(), transaction.getContentHash());
-                log.info(format("SUB: %s/%s: %s", transaction.getNamespace(), transaction.getKey(), transaction.getContentHash()));
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void onConsensus(Transaction transaction) {
+        transactionLog.addTransaction(transaction);
+        index.put(transaction.getKey(), transaction.getContentHash());
     }
 }

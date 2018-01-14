@@ -42,6 +42,13 @@ dependencies {
     compile 'io.reactivex.rxjava2:rxjava:2.1.+'
     compile 'com.github.ipfs:java-ipfs-api:v1.2.0'
 
+    compile 'com.typesafe.akka:akka-actor_2.11:2.5.8'
+    compile 'com.typesafe.akka:akka-remote_2.11:2.5.8'
+    compile 'com.typesafe.akka:akka-slf4j_2.11:2.5.8'
+    compile 'com.typesafe.akka:akka-cluster_2.11:2.5.8'
+    compile 'com.typesafe.akka:akka-cluster-metrics_2.11:2.5.8'
+    compile 'com.typesafe.akka:akka-cluster-tools_2.11:2.5.8'
+
     compile 'org.jboss.resteasy:resteasy-jaxrs:3.1.+'
     compile 'org.jboss.resteasy:resteasy-guice:3.1.+'
     compile 'org.jboss.resteasy:resteasy-jackson2-provider:3.1.+'

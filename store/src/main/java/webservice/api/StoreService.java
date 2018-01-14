@@ -1,8 +1,9 @@
-package service.api;
+package webservice.api;
+
+import model.Key;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -22,5 +23,11 @@ public interface StoreService {
     @Path("{key}/{value}")
     @GET
     Response setValue(
-            @PathParam("namespace") String namespace,@PathParam("key") String key, @PathParam("value") String value);
+            @PathParam("namespace") String namespace,
+            @PathParam("key") String key,
+            @PathParam("value") String value);
+
+    @Path("/index")
+    @GET
+    Map<Key, String> getIndex();
 }

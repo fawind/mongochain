@@ -2,9 +2,10 @@ package model;
 
 import lombok.Data;
 
-@Data
-public class NamespaceKey {
+import java.io.Serializable;
 
+@Data
+public class Key implements Serializable {
     private final String namespace;
     private final String key;
 }

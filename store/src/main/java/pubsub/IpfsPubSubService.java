@@ -4,7 +4,8 @@ import com.google.inject.Inject;
 import io.ipfs.api.IPFS;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import model.TransactionMessage;
+import model.Key;
+import model.Transaction;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.IOException;
@@ -33,15 +34,15 @@ public class IpfsPubSubService implements PubSubService {
     }
 
     @Override
-    public void publish(final String topic, final String namespace, final String key, final String contentHash)
+    public void publish(final String topic, final Key key, final String contentHash)
             throws IOException {
-        TransactionMessage transactionMessage = new TransactionMessage(namespace, key, contentHash);
+        Transaction transactionMessage = new Transaction(key, contentHash);
         String message = serializeToString(transactionMessage);
         pubsub.pub(topic, message);
     }
 
     @Override
-    public Observable<TransactionMessage> observe(String topic) throws IOException {
+    public Observable<Transaction> observe(String topic) throws IOException {
         supplier = pubsub.sub(topic);
         // Poll supplier due to empty map initialization
         supplier.get();
@@ -51,10 +52,10 @@ public class IpfsPubSubService implements PubSubService {
                 .retry();
     }
 
-    private TransactionMessage getMessage() throws UnsupportedEncodingException {
+    private Transaction getMessage() throws UnsupportedEncodingException {
         Map<String, String> messageObject = (Map<String, String>) supplier.get();
         String message = messageObject.get("data");
-        return (TransactionMessage) deserializeFromString(message);
+        return (Transaction) deserializeFromString(message);
     }
 
     private String serializeToString(Serializable obj) throws UnsupportedEncodingException {

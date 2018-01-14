@@ -1,3 +1,6 @@
+# Custom config resource
+config.properties
+
 # Build files
 build
 out

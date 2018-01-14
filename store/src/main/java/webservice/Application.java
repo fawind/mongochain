@@ -1,11 +1,11 @@
-package service;
+package webservice;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import configuration.DatastoreModule;
-import service.resources.PingResource;
-import service.resources.StoreResource;
+import webservice.resources.PingResource;
+import webservice.resources.StoreResource;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;

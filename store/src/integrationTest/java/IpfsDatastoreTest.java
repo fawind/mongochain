@@ -1,27 +1,29 @@
-import configuration.DatastoreModule;
+import cluster.ConsensusService;
 import configuration.IPFSLoader;
 import datastore.IpfsDatastore;
+import datastore.TransactionBacklog;
 import index.ContentHashIndex;
 import index.InMemoryContentHashIndex;
 import io.ipfs.api.IPFS;
+import model.DatastoreException;
+import model.Key;
 import org.jukito.JukitoModule;
 import org.jukito.JukitoRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import pubsub.IpfsPubSubService;
-import pubsub.PubSubService;
 import storage.ContentAddressableStorage;
 import storage.IpfsStorage;
 
 import javax.inject.Inject;
 import java.util.Random;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(JukitoRunner.class)
 public class IpfsDatastoreTest {
-    
-    private static final String PUBSUB_TOPIC = "ipfs-store-node";
     
     public static class Module extends JukitoModule {
         @Override
@@ -29,8 +31,8 @@ public class IpfsDatastoreTest {
             bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class);
             bind(ContentAddressableStorage.class).to(IpfsStorage.class);
             bind(IPFS.class).toInstance(new IPFSLoader().getIPFS());
-            bind(PubSubService.class).to(IpfsPubSubService.class);
-            bindConstant().annotatedWith(DatastoreModule.PubsubTopic.class).to(PUBSUB_TOPIC);
+            bind(TransactionBacklog.class).toInstance(mock(TransactionBacklog.class));
+            bind(ConsensusService.class).toInstance(mock(ConsensusService.class));
         }
     }
     
@@ -38,17 +40,16 @@ public class IpfsDatastoreTest {
     private IpfsDatastore ipfsDatastore;
     
     @Test
-    public void givenKeyAndValue_whenAdd_thenRetrieveValueForKey() {
+    public void givenKeyAndValue_whenAdd_thenRetrieveValueForKey(TransactionBacklog transactionBacklog) throws DatastoreException {
         // GIVEN
-        final String namespace = "namespace";
-        final String key = "key";
+        final Key key = new Key("namespace", "key");
         final Random randomGenerator = new Random();
         final String value = String.valueOf(randomGenerator.nextInt(1000));
         
         // WHEN
-        ipfsDatastore.add(namespace, key, value);
-        String savedValue = ipfsDatastore.get(namespace, key);
-        
-        assertThat(savedValue).isEqualTo(value);
+        ipfsDatastore.add(key, value);
+
+        // THEN
+        verify(transactionBacklog, times(1)).addTransaction(any());
     }
 }

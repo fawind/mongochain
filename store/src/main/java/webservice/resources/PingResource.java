@@ -1,6 +1,6 @@
-package service.resources;
+package webservice.resources;
 
-import service.api.PingService;
+import webservice.api.PingService;
 
 import javax.ws.rs.core.Response;
 

@@ -1,12 +1,12 @@
 <web-app>
     <context-param>
         <param-name>javax.ws.rs.Application</param-name>
-        <param-value>service.Application</param-value>
+        <param-value>webservice.Application</param-value>
     </context-param>
 
     <context-param>
         <param-name>resteasy.guice.modules</param-name>
-        <param-value>service.Application</param-value>
+        <param-value>webservice.Application</param-value>
     </context-param>
 
     <context-param>
