@@ -40,7 +40,7 @@ public class DatastoreProperties {
 
     private String getValue(String field) {
         if (configResource == null || !configResource.containsKey(field)) {
-            return defaultConfigResource.toString();
+            return defaultConfigResource.getString(field);
         }
         return configResource.getString(field);
     }
