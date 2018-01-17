@@ -1,5 +1,6 @@
 package configuration;
 
+import cluster.ConsensusService;
 import cluster.ConsensusServiceConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -20,8 +21,9 @@ public class DatastoreModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(Datastore.class).to(IpfsDatastore.class).in(Singleton.class);
+        bind(Datastore.class).to(IpfsDatastore.class).asEagerSingleton();
         bind(ContentAddressableStorage.class).to(IpfsStorage.class);
+        bind(ConsensusService.class).asEagerSingleton();
         bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class).in(Singleton.class);
         bind(TransactionBacklog.class).in(Singleton.class);
         bind(SecuredTransactionLog.class).in(Singleton.class);

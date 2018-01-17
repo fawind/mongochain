@@ -70,10 +70,7 @@ public class ConsensusService {
     }
 
     private Config getAkkaConfig() {
-        return ConfigFactory.parseString(
-                "akka.remote.netty.tcp.port=" + config.getPort() + "\n" +
-                        "akka.remote.artery.canonical.port=" + config.getPort())
-                .withFallback(ConfigFactory.load());
+        return ConfigFactory.load();
     }
 
     private void subscribeToBacklog() {

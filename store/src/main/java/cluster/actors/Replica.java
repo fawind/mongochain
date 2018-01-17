@@ -59,8 +59,8 @@ public class Replica extends PubSubActor {
             // TODO: Wait for tasks with lower seq number to finish
             ResultMessage result = ResultMessage.fromCommit(commit);
             if (!resultLog.contains(result)) {
-                log().info("Node {} reached consensus on result: {}", getSelf(), result);
                 if (!result.getIdentity().equals(config.getIdentity())) {
+                    log().info("Node {} reached consensus on result: {}", getSelf(), result);
                     try {
                         config.getOnConsensus().accept(result.getTransaction());
                     } catch (Exception e) {
