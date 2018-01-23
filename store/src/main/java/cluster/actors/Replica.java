@@ -7,9 +7,12 @@ import cluster.messages.PreprepareMessage;
 import cluster.messages.ResultMessage;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import static cluster.actors.Client.CLIENT_TOPIC;
+import static com.google.common.collect.Iterables.getLast;
 
 public class Replica extends PubSubActor {
 
@@ -20,6 +23,8 @@ public class Replica extends PubSubActor {
     private final List<PrepareMessage> prepareMessageLog = new ArrayList<>();
     private final List<CommitMessage> commitMessageLog = new ArrayList<>();
     private final List<ResultMessage> resultLog = new ArrayList<>();
+    private final PriorityQueue<ResultMessage> pendingResults =
+            new PriorityQueue<>(10, Comparator.comparingInt(ResultMessage::getSequence));
     private final ActorConfiguration config;
 
     public Replica(ActorConfiguration config) {
@@ -58,26 +63,50 @@ public class Replica extends PubSubActor {
         if (isCommittedLocally(commit.getSequence())) {
             // TODO: Wait for tasks with lower seq number to finish
             ResultMessage result = ResultMessage.fromCommit(commit);
-            if (!resultLog.contains(result)) {
-                if (!result.getIdentity().equals(config.getIdentity())) {
-                    log().info("Node {} reached consensus on result: {}", getSelf(), result);
-                    try {
-                        config.getOnConsensus().accept(result.getTransaction());
-                    } catch (Exception e) {
-                        log().error("Error emitting transaction with consensus", e);
-                    }
-                }
+            // TODO: Handle lost messages
+            if (isNextResult(result)) {
+                processValidatedResult(result);
+                processPendingResults();
+            } else {
+                pendingResults.add(result);
             }
-            resultLog.add(result);
-            pubsubService.publish(CLIENT_TOPIC, result);
-            // TODO: Save message timestamp for new min timestamps for filtering new transactions
         }
     }
-
+    
+    private void processValidatedResult(ResultMessage result) {
+        if (!resultLog.contains(result)) {
+            if (!result.getIdentity().equals(config.getIdentity())) {
+                log().info("Node {} reached consensus on result: {}", getSelf(), result);
+                try {
+                    config.getOnConsensus().accept(result.getTransaction());
+                } catch (Exception e) {
+                    log().error("Error emitting transaction with consensus", e);
+                }
+            }
+        }
+        resultLog.add(result);
+        pubsubService.publish(CLIENT_TOPIC, result);
+        // TODO: Save message timestamp for new min timestamps for filtering new transactions
+    }
+    
+    private void processPendingResults() {
+        while (isNextResult(pendingResults.peek())) {
+            ResultMessage result = pendingResults.poll();
+            processValidatedResult(result);
+        }
+    }
+    
     private boolean isPrepared(int sequence) {
         // TODO: Use counter for message log
         return preprepareMessageLog.stream()
                 .filter(message -> message.getSequence() == sequence).count() >= config.getFaultThreshold();
+    }
+    
+    private boolean isNextResult(ResultMessage result) {
+        if (resultLog.isEmpty()) {
+            return result.getSequence() == 0;
+        }
+        return getLast(resultLog).getSequence() + 1 == result.getSequence();
     }
 
     private boolean isCommittedLocally(int sequence) {
