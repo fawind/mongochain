@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cluster.actors.Primary.PRIMARY_TOPIC;
+import static cluster.logging.Event.logEvent;
+import static cluster.logging.EventType.CLIENT_CONSENSUS_RESULT;
+import static cluster.logging.EventType.CLIENT_INTEGRATE_RESULT;
+import static cluster.logging.EventType.CLIENT_NEW_TRANSACTION;
 
 public class Client extends PubSubActor {
 
@@ -33,6 +37,7 @@ public class Client extends PubSubActor {
     }
 
     private void handleNewTransaction(NewTransactionMessage newTransaction) {
+        log().info(logEvent(CLIENT_NEW_TRANSACTION, newTransaction, getSelf()));
         pubsubService.publish(PRIMARY_TOPIC, newTransaction);
     }
 
@@ -40,10 +45,11 @@ public class Client extends PubSubActor {
         if (!result.getIdentity().equals(config.getIdentity())) {
             return;
         }
+        log().info(logEvent(CLIENT_CONSENSUS_RESULT, result, getSelf()));
         resultMessageLog.add(result);
         if (reachedConsensus(result.getSequence())) {
             if (!resultLog.contains(result)) {
-                log().info("Node {} reached consensus on result: {}", getSelf(), result);
+                log().info(logEvent(CLIENT_INTEGRATE_RESULT, result, getSelf()));
                 try {
                     config.getOnConsensus().accept(result.getTransaction());
                 } catch (Exception e) {

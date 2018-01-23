@@ -12,6 +12,14 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import static cluster.actors.Client.CLIENT_TOPIC;
+import static cluster.logging.Event.logEvent;
+import static cluster.logging.EventType.REPLICA_CONSENSUS_RESULT;
+import static cluster.logging.EventType.REPLICA_INTEGRATE_RESULT;
+import static cluster.logging.EventType.REPLICA_NEW_COMMIT;
+import static cluster.logging.EventType.REPLICA_NEW_PREPARE;
+import static cluster.logging.EventType.REPLICA_NEW_RESULT;
+import static cluster.logging.EventType.REPLICA_RECIEVE_COMMIT;
+import static cluster.logging.EventType.REPLICA_RECIEVE_PREPARE;
 import static com.google.common.collect.Iterables.getLast;
 
 public class Replica extends PubSubActor {
@@ -46,23 +54,27 @@ public class Replica extends PubSubActor {
         PrepareMessage prepare = PrepareMessage.fromPreprepare(preprepare);
         preprepareMessageLog.add(preprepare);
         prepareMessageLog.add(prepare);
+        log().info(logEvent(REPLICA_NEW_PREPARE, prepare, getSelf()));
         pubsubService.publish(REPLICA_TOPIC, prepare);
     }
 
     private void handlePrepare(PrepareMessage prepare) {
         prepareMessageLog.add(prepare);
+        log().info(logEvent(REPLICA_RECIEVE_PREPARE, prepare, getSelf()));
         if (isPrepared(prepare.getSequence())) {
             CommitMessage commit = CommitMessage.fromPreprepare(prepare);
             commitMessageLog.add(commit);
+            log().info(logEvent(REPLICA_NEW_COMMIT, commit,getSelf()));
             pubsubService.publish(REPLICA_TOPIC, commit);
         }
     }
 
     private void handleCommit(CommitMessage commit) {
+        log().info(logEvent(REPLICA_RECIEVE_COMMIT, commit, getSelf()));
         commitMessageLog.add(commit);
         if (isCommittedLocally(commit.getSequence())) {
-            // TODO: Wait for tasks with lower seq number to finish
             ResultMessage result = ResultMessage.fromCommit(commit);
+            log().info(logEvent(REPLICA_NEW_RESULT, result, getSelf()));
             // TODO: Handle lost messages
             if (isNextResult(result)) {
                 processValidatedResult(result);
@@ -74,9 +86,10 @@ public class Replica extends PubSubActor {
     }
     
     private void processValidatedResult(ResultMessage result) {
+        log().info(logEvent(REPLICA_CONSENSUS_RESULT, result, getSelf()));
         if (!resultLog.contains(result)) {
             if (!result.getIdentity().equals(config.getIdentity())) {
-                log().info("Node {} reached consensus on result: {}", getSelf(), result);
+                log().info(logEvent(REPLICA_INTEGRATE_RESULT, result, getSelf()));
                 try {
                     config.getOnConsensus().accept(result.getTransaction());
                 } catch (Exception e) {
@@ -90,7 +103,7 @@ public class Replica extends PubSubActor {
     }
     
     private void processPendingResults() {
-        while (isNextResult(pendingResults.peek())) {
+        while (!pendingResults.isEmpty() && isNextResult(pendingResults.peek())) {
             ResultMessage result = pendingResults.poll();
             processValidatedResult(result);
         }

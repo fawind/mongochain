@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cluster.actors.Replica.REPLICA_TOPIC;
+import static cluster.logging.Event.logEvent;
+import static cluster.logging.EventType.PRIMARY_NEW_PREPREPARE;
 
 public class Primary extends PubSubActor {
 
@@ -31,6 +33,7 @@ public class Primary extends PubSubActor {
     private void handleIncomingTransaction(NewTransactionMessage newTransaction) {
         PreprepareMessage preprepare = new PreprepareMessage(
                 sequenceNumber++, newTransaction.getTransaction(), newTransaction.getIdentity());
+        log().info(logEvent(PRIMARY_NEW_PREPREPARE, preprepare, getSelf()));
         pubsubService.publish(REPLICA_TOPIC, preprepare);
         messageLog.add(preprepare);
     }
