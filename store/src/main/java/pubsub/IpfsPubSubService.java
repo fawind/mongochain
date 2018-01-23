@@ -7,6 +7,8 @@ import io.reactivex.schedulers.Schedulers;
 import model.Key;
 import model.Transaction;
 import org.apache.commons.lang3.SerializationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,13 +19,12 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class IpfsPubSubService implements PubSubService {
 
-    private static Logger log = Logger.getLogger(IpfsPubSubService.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(IpfsPubSubService.class);
 
     private final IPFS.Pubsub pubsub;
     private Supplier<Object> supplier;
@@ -48,7 +49,7 @@ public class IpfsPubSubService implements PubSubService {
         supplier.get();
         return Observable.interval(1, TimeUnit.SECONDS, Schedulers.io())
                 .map(tick -> getMessage())
-                .doOnError(error -> log.severe(error.toString()))
+                .doOnError(error -> log.error(error.toString()))
                 .retry();
     }
 

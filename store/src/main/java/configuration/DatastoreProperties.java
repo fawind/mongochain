@@ -1,12 +1,14 @@
 package configuration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 public class DatastoreProperties {
 
-    private static Logger log = Logger.getLogger(DatastoreProperties.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(DatastoreProperties.class);
 
     private static final String DEFAULTS_FILE_NAME = "defaultConfig";
     private static final String CONFIG_FILE_NAME = "config";
