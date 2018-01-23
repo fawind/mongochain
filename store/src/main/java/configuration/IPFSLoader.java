@@ -3,25 +3,23 @@ package configuration;
 import io.ipfs.api.IPFS;
 
 public class IPFSLoader {
-   private static IPFS ipfs;
-   private static final int port = 5001;
-   private static final String version = "/api/v0/";
+
+   private static IPFS IPFS_INSTANCE;
+   private static final int PORT = 5001;
+   private static final String VERSION = "/api/v0/";
     
-    public IPFS getIPFS() {
-       if (ipfs == null) {
-           initializeIPFS();
+    public IPFS getIPFS(boolean isDockerEnv) {
+       if (IPFS_INSTANCE == null) {
+           initializeIPFS(isDockerEnv);
        }
-       return ipfs;
+       return IPFS_INSTANCE;
    }
    
-   private void initializeIPFS() {
-       String env = System.getenv("STORE_ENV");
-       String host;
-       if (env != null && env.equals("docker")) {
-           host = "ipfs";
+   private void initializeIPFS(boolean isDockerEnv) {
+       if (isDockerEnv) {
+           IPFS_INSTANCE = new IPFS("ipfs", PORT, VERSION);
        } else {
-           host = "127.0.0.1";
+           IPFS_INSTANCE = new IPFS("127.0.0.1", PORT, VERSION);
        }
-       ipfs = new IPFS(host, port, version);
    }
 }

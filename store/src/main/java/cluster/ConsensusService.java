@@ -44,7 +44,7 @@ public class ConsensusService {
                 .identity(identityProvider.get())
                 .onConsensus(onConsensus)
                 .build();
-        system = ActorSystem.create(SYSTEM_NAME, getAkkaConfig());
+        system = ActorSystem.create(SYSTEM_NAME, config.getAkkaConfig());
         if (config.isPrimary()) {
             startPrimary();
         }
@@ -67,10 +67,6 @@ public class ConsensusService {
 
     private void startPrimary() {
        primary = system.actorOf(Props.create(Primary.class), Primary.ACTOR_NAME);
-    }
-
-    private Config getAkkaConfig() {
-        return ConfigFactory.load();
     }
 
     private void subscribeToBacklog() {
