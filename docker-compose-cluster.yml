@@ -8,6 +8,7 @@ services:
         environment:
             STORE_ENV: docker
             SEED_NODE: akka://consensus-system@store-seed:2551
+            NODE_HOST: store-cluster
     ipfs-cluster:
         image: jbenet/go-ipfs:latest
 networks:
