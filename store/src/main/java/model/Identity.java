@@ -2,11 +2,10 @@ package model;
 
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Data
-public class Identity implements Serializable {
+public class Identity {
 
     private final UUID id;
 

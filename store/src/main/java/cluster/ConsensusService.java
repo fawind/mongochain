@@ -72,7 +72,7 @@ public class ConsensusService {
     private void subscribeToBacklog() {
         transactionBacklog.subscribe(transaction -> {
             NewTransactionMessage newTransactionMessage = new NewTransactionMessage(
-                    transaction, identityProvider.get());
+                    transaction, identityProvider.get().toString());
             client.tell(newTransactionMessage, ActorRef.noSender());
         });
     }

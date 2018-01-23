@@ -1,13 +1,20 @@
 package cluster.messages;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import model.Identity;
 import model.Transaction;
 
 import java.io.Serializable;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter(AccessLevel.NONE)
 public class NewTransactionMessage implements Serializable {
-    private final Transaction transaction;
-    private final Identity identity;
+    private Transaction transaction;
+    private String identity;
 }
