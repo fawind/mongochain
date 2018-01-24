@@ -51,6 +51,9 @@ public class Replica extends PubSubActor {
     }
 
     private void handlePreprepare(PreprepareMessage preprepare) {
+        if (isFromLocalClient(preprepare.getIdentity())) {
+            return;
+        }
         PrepareMessage prepare = PrepareMessage.fromPreprepare(preprepare);
         preprepareMessageLog.add(preprepare);
         prepareMessageLog.add(prepare);
@@ -59,6 +62,9 @@ public class Replica extends PubSubActor {
     }
 
     private void handlePrepare(PrepareMessage prepare) {
+        if (isFromLocalClient(prepare.getIdentity())) {
+            return;
+        }
         prepareMessageLog.add(prepare);
         log().info(logEvent(REPLICA_RECEIVE_PREPARE, prepare, getSelf()));
         if (isPrepared(prepare.getSequence())) {
@@ -70,6 +76,9 @@ public class Replica extends PubSubActor {
     }
 
     private void handleCommit(CommitMessage commit) {
+        if (isFromLocalClient(commit.getIdentity())) {
+            return;
+        }
         log().info(logEvent(REPLICA_RECEIVE_COMMIT, commit, getSelf()));
         commitMessageLog.add(commit);
         if (isCommittedLocally(commit.getSequence())) {
@@ -86,15 +95,16 @@ public class Replica extends PubSubActor {
     }
     
     private void processValidatedResult(ResultMessage result) {
+        if (isFromLocalClient(result.getIdentity())) {
+            return;
+        }
         log().info(logEvent(REPLICA_CONSENSUS_RESULT, result, getSelf()));
         if (!resultLog.contains(result)) {
-            if (!result.getIdentity().equals(config.getIdentity())) {
-                log().info(logEvent(REPLICA_INTEGRATE_RESULT, result, getSelf()));
-                try {
-                    config.getOnConsensus().accept(result.getTransaction());
-                } catch (Exception e) {
-                    log().error("Error emitting transaction with consensus", e);
-                }
+            log().info(logEvent(REPLICA_INTEGRATE_RESULT, result, getSelf()));
+            try {
+                config.getOnConsensus().accept(result.getTransaction());
+            } catch (Exception e) {
+                log().error("Error emitting transaction with consensus", e);
             }
         }
         resultLog.add(result);
@@ -126,5 +136,9 @@ public class Replica extends PubSubActor {
         return isPrepared(sequence) &&
                 commitMessageLog.stream()
                         .filter(message -> message.getSequence() == sequence).count() >= config.getFaultThreshold();
+    }
+
+    private boolean isFromLocalClient(String identity) {
+        return config.getIdentity().isSameIdentity(identity);
     }
 }

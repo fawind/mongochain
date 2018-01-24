@@ -12,4 +12,8 @@ public class Identity {
     public Identity() {
         this.id = UUID.randomUUID();
     }
+
+    public boolean isSameIdentity(String identity) {
+        return this.id.toString().equals(identity);
+    }
 }

@@ -42,7 +42,7 @@ public class Client extends PubSubActor {
     }
 
     private void handleResult(ResultMessage result) {
-        if (!result.getIdentity().equals(config.getIdentity())) {
+        if (!isFromLocalClient(result.getIdentity())) {
             return;
         }
         log().info(logEvent(CLIENT_CONSENSUS_RESULT, result, getSelf()));
@@ -63,5 +63,9 @@ public class Client extends PubSubActor {
     private boolean reachedConsensus(int sequence) {
         return resultMessageLog.stream()
                 .filter(message -> message.getSequence() == sequence).count() >= config.getFaultThreshold();
+    }
+
+    private boolean isFromLocalClient(String identity) {
+        return config.getIdentity().isSameIdentity(identity);
     }
 }
