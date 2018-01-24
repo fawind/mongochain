@@ -11,6 +11,8 @@ services:
             - "9091-9200:9090"
         environment:
             STORE_ENV: docker
+            PRIMARY: "false"
+            FAULT_THRESHOLD: 0
             SEED_NODE: akka://consensus-system@store-seed:2551
             WAIT_HOSTS:
                 ipfs-cluster:5001

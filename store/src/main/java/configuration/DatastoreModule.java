@@ -25,12 +25,14 @@ public class DatastoreModule extends AbstractModule {
     private static final String DOCKER_ENV = "STORE_ENV";
     private static final String AKKA_DOCKER_CONFIG = "applicationDocker.conf";
     private static final String AKKA_LOCAL_CONFIG = "applicationLocal.conf";
-
-    private final DatastoreProperties properties = new DatastoreProperties();
+    private static final String PRIMARY_ENV = "PRIMARY";
+    private static final String FAULT_THRESHOLD_ENV = "FAULT_THRESHOLD";
 
     @Override
     protected void configure() {
         log.info("Is docker env: {}", isDockerEnv());
+        log.info("Is primary: {}", isPrimary());
+        log.info("Fault Threshold: {}", getFaultThreshold());
         bind(Datastore.class).to(IpfsDatastore.class).asEagerSingleton();
         bind(ContentAddressableStorage.class).to(IpfsStorage.class);
         bind(ConsensusService.class).asEagerSingleton();
@@ -49,9 +51,8 @@ public class DatastoreModule extends AbstractModule {
     @Singleton
     public ConsensusServiceConfiguration getConsensusServiceConfiguration() {
         return ConsensusServiceConfiguration.builder()
-                .port(properties.getAkkaPort())
-                .faultThreshold(properties.getFaultThreshold())
-                .isPrimary(properties.isPrimary())
+                .faultThreshold(getFaultThreshold())
+                .isPrimary(isPrimary())
                 .akkaConfig(getAkkaConfig())
                 .build();
     }
@@ -63,7 +64,20 @@ public class DatastoreModule extends AbstractModule {
             return ConfigFactory.load(AKKA_LOCAL_CONFIG);
         }
     }
-
+    
+    private boolean isPrimary() {
+        String primary = System.getenv(PRIMARY_ENV);
+        return primary == null || Boolean.parseBoolean(primary);
+    }
+    
+    private int getFaultThreshold() {
+        String faultThreshold = System.getenv(FAULT_THRESHOLD_ENV);
+        if (faultThreshold == null) {
+            return 0;
+        }
+        return Integer.parseInt(faultThreshold);
+    }
+    
     private boolean isDockerEnv() {
         String env = System.getenv(DOCKER_ENV);
         return env != null && env.equals("docker");

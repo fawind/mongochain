@@ -18,8 +18,8 @@ import static cluster.logging.EventType.REPLICA_INTEGRATE_RESULT;
 import static cluster.logging.EventType.REPLICA_NEW_COMMIT;
 import static cluster.logging.EventType.REPLICA_NEW_PREPARE;
 import static cluster.logging.EventType.REPLICA_NEW_RESULT;
-import static cluster.logging.EventType.REPLICA_RECIEVE_COMMIT;
-import static cluster.logging.EventType.REPLICA_RECIEVE_PREPARE;
+import static cluster.logging.EventType.REPLICA_RECEIVE_COMMIT;
+import static cluster.logging.EventType.REPLICA_RECEIVE_PREPARE;
 import static com.google.common.collect.Iterables.getLast;
 
 public class Replica extends PubSubActor {
@@ -60,7 +60,7 @@ public class Replica extends PubSubActor {
 
     private void handlePrepare(PrepareMessage prepare) {
         prepareMessageLog.add(prepare);
-        log().info(logEvent(REPLICA_RECIEVE_PREPARE, prepare, getSelf()));
+        log().info(logEvent(REPLICA_RECEIVE_PREPARE, prepare, getSelf()));
         if (isPrepared(prepare.getSequence())) {
             CommitMessage commit = CommitMessage.fromPreprepare(prepare);
             commitMessageLog.add(commit);
@@ -70,7 +70,7 @@ public class Replica extends PubSubActor {
     }
 
     private void handleCommit(CommitMessage commit) {
-        log().info(logEvent(REPLICA_RECIEVE_COMMIT, commit, getSelf()));
+        log().info(logEvent(REPLICA_RECEIVE_COMMIT, commit, getSelf()));
         commitMessageLog.add(commit);
         if (isCommittedLocally(commit.getSequence())) {
             ResultMessage result = ResultMessage.fromCommit(commit);

@@ -7,18 +7,19 @@ import cluster.actors.Client;
 import cluster.actors.Primary;
 import cluster.actors.Replica;
 import cluster.messages.NewTransactionMessage;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import datastore.IdentityProvider;
 import datastore.TransactionBacklog;
 import io.reactivex.functions.Consumer;
 import model.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
 public class ConsensusService {
 
     public static final String SYSTEM_NAME = "consensus-system";
+    private static final Logger log = LoggerFactory.getLogger(ConsensusService.class);
 
     private final ConsensusServiceConfiguration config;
     private final TransactionBacklog transactionBacklog;
@@ -39,6 +40,7 @@ public class ConsensusService {
     }
 
     public void start(Consumer<Transaction> onConsensus) {
+        log.info("Starting akka system with config: {}", config);
         ActorConfiguration actorConfig = ActorConfiguration.builder()
                 .faultThreshold(config.getFaultThreshold())
                 .identity(identityProvider.get())

@@ -30,7 +30,7 @@ public class IpfsDatastoreTest {
         protected void configureTest() {
             bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class);
             bind(ContentAddressableStorage.class).to(IpfsStorage.class);
-            bind(IPFS.class).toInstance(new IPFSLoader().getIPFS());
+            bind(IPFS.class).toInstance(new IPFSLoader().getIPFS(false));
             bind(TransactionBacklog.class).toInstance(mock(TransactionBacklog.class));
             bind(ConsensusService.class).toInstance(mock(ConsensusService.class));
         }

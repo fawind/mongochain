@@ -13,6 +13,8 @@ services:
             - "9090:9090"
         environment:
             STORE_ENV: docker
+            PRIMARY: "true"
+            FAULT_THRESHOLD: 0
             PUBLISH_HOST: store-seed
             PUBLISH_PORT: 2551
             SEED_NODE: akka://consensus-system@store-seed:2551
