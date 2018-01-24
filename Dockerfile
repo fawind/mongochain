@@ -1,7 +1,9 @@
-FROM gradle:4.4.1-jdk8
+FROM java:openjdk-8-alpine
 
-USER root
-RUN apt-get update && apt-get upgrade -y
-ADD store .
+ADD ./store/build/output/store .
 
-CMD gradle appStart
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.0.0/wait /wait
+RUN chmod +x /wait
+RUN apk add --update bash && rm -rf /var/cache/apk/*
+
+CMD /wait && ./start.sh

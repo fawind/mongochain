@@ -1,8 +1,14 @@
 version: '3'
 services:
+    ipfs:
+        image: jbenet/go-ipfs:latest
+        networks:
+            - akka-cluster
     store-seed:
         shm_size: 500M
         build: .
+        depends_on:
+            - ipfs
         ports:
             - "9090:9090"
         environment:
@@ -10,12 +16,9 @@ services:
             PUBLISH_HOST: store-seed
             PUBLISH_PORT: 2551
             SEED_NODE: akka://consensus-system@store-seed:2551
+            WAIT_HOSTS:
+                ipfs:5001
         networks:
             - akka-cluster
-    ipfs:
-        image: jbenet/go-ipfs:latest
-        networks:
-            - akka-cluster
-
 networks:
     akka-cluster:
