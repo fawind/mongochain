@@ -24,7 +24,7 @@ public class Client extends PubSubActor {
 
     public Client(ActorConfiguration config) {
         this.config = config;
-        pubsubService.observe(CLIENT_TOPIC);
+        observe(CLIENT_TOPIC);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Client extends PubSubActor {
 
     private void handleNewTransaction(NewTransactionMessage newTransaction) {
         log().info(logEvent(CLIENT_NEW_TRANSACTION, newTransaction, getSelf()));
-        pubsubService.publish(PRIMARY_TOPIC, newTransaction);
+        publish(PRIMARY_TOPIC, newTransaction);
     }
 
     private void handleResult(ResultMessage result) {

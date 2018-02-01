@@ -4,7 +4,6 @@ import com.typesafe.config.Config;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import model.Identity;
 
 @Data
 @Builder

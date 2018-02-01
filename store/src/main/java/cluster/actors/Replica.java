@@ -37,7 +37,7 @@ public class Replica extends PubSubActor {
 
     public Replica(ActorConfiguration config) {
         this.config = config;
-        pubsubService.observe(REPLICA_TOPIC);
+        observe(REPLICA_TOPIC);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class Replica extends PubSubActor {
         preprepareMessageLog.add(preprepare);
         prepareMessageLog.add(prepare);
         log().info(logEvent(REPLICA_NEW_PREPARE, prepare, getSelf()));
-        pubsubService.publish(REPLICA_TOPIC, prepare);
+        publish(REPLICA_TOPIC, prepare);
     }
 
     private void handlePrepare(PrepareMessage prepare) {
@@ -71,7 +71,7 @@ public class Replica extends PubSubActor {
             CommitMessage commit = CommitMessage.fromPreprepare(prepare);
             commitMessageLog.add(commit);
             log().info(logEvent(REPLICA_NEW_COMMIT, commit,getSelf()));
-            pubsubService.publish(REPLICA_TOPIC, commit);
+            publish(REPLICA_TOPIC, commit);
         }
     }
 
@@ -108,7 +108,7 @@ public class Replica extends PubSubActor {
             }
         }
         resultLog.add(result);
-        pubsubService.publish(CLIENT_TOPIC, result);
+        publish(CLIENT_TOPIC, result);
         // TODO: Save message timestamp for new min timestamps for filtering new transactions
     }
     

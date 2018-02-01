@@ -19,7 +19,7 @@ public class Primary extends PubSubActor {
     private int sequenceNumber = 0;
 
     public Primary() {
-        pubsubService.observe(PRIMARY_TOPIC);
+        observe(PRIMARY_TOPIC);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class Primary extends PubSubActor {
         PreprepareMessage preprepare = new PreprepareMessage(
                 sequenceNumber++, newTransaction.getTransaction(), newTransaction.getIdentity());
         log().info(logEvent(PRIMARY_NEW_PREPREPARE, preprepare, getSelf()));
-        pubsubService.publish(REPLICA_TOPIC, preprepare);
+        publish(REPLICA_TOPIC, preprepare);
         messageLog.add(preprepare);
     }
 }

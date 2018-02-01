@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import model.Identity;
 import model.Transaction;
 
 import java.io.Serializable;
