@@ -43,6 +43,7 @@ public class Client extends PubSubActor {
 
     private void handleResult(ResultMessage result) {
         if (!isFromLocalClient(result.getIdentity())) {
+            log().info("Not From local client");
             return;
         }
         log().info(logEvent(CLIENT_CONSENSUS_RESULT, result, getSelf()));
@@ -66,6 +67,6 @@ public class Client extends PubSubActor {
     }
 
     private boolean isFromLocalClient(String identity) {
-        return config.getIdentity().isSameIdentity(identity);
+        return config.getIdentity().equals(identity);
     }
 }

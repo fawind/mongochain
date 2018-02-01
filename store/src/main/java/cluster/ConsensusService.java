@@ -7,7 +7,6 @@ import cluster.actors.Client;
 import cluster.actors.Primary;
 import cluster.actors.Replica;
 import cluster.messages.NewTransactionMessage;
-import datastore.IdentityProvider;
 import datastore.TransactionBacklog;
 import io.reactivex.functions.Consumer;
 import model.Transaction;
@@ -23,7 +22,6 @@ public class ConsensusService {
 
     private final ConsensusServiceConfiguration config;
     private final TransactionBacklog transactionBacklog;
-    private final IdentityProvider identityProvider;
     private ActorSystem system;
     private ActorRef primary;
     private ActorRef replica;
@@ -32,18 +30,16 @@ public class ConsensusService {
     @Inject
     public ConsensusService(
             ConsensusServiceConfiguration config,
-            TransactionBacklog transactionBacklog,
-            IdentityProvider identityProvider) {
+            TransactionBacklog transactionBacklog) {
         this.config = config;
         this.transactionBacklog = transactionBacklog;
-        this.identityProvider = identityProvider;
     }
 
     public void start(Consumer<Transaction> onConsensus) {
         log.info("Starting akka system with config: {}", config);
         ActorConfiguration actorConfig = ActorConfiguration.builder()
                 .faultThreshold(config.getFaultThreshold())
-                .identity(identityProvider.get())
+                .identity(config.getIdentity())
                 .onConsensus(onConsensus)
                 .build();
         system = ActorSystem.create(SYSTEM_NAME, config.getAkkaConfig());
@@ -74,7 +70,7 @@ public class ConsensusService {
     private void subscribeToBacklog() {
         transactionBacklog.subscribe(transaction -> {
             NewTransactionMessage newTransactionMessage = new NewTransactionMessage(
-                    transaction, identityProvider.get().toString());
+                    transaction, config.getIdentity());
             client.tell(newTransactionMessage, ActorRef.noSender());
         });
     }

@@ -19,14 +19,19 @@ import org.slf4j.LoggerFactory;
 import storage.ContentAddressableStorage;
 import storage.IpfsStorage;
 
+import java.util.UUID;
+
 public class DatastoreModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(DatastoreModule.class);
+
     private static final String DOCKER_ENV = "STORE_ENV";
-    private static final String AKKA_DOCKER_CONFIG = "applicationDocker.conf";
-    private static final String AKKA_LOCAL_CONFIG = "applicationLocal.conf";
     private static final String PRIMARY_ENV = "PRIMARY";
     private static final String FAULT_THRESHOLD_ENV = "FAULT_THRESHOLD";
+    private static final String AKKA_DOCKER_CONFIG = "applicationDocker.conf";
+    private static final String AKKA_LOCAL_CONFIG = "applicationLocal.conf";
+
+    private static final UUID IDENTITY = UUID.randomUUID();
 
     @Override
     protected void configure() {
@@ -51,6 +56,7 @@ public class DatastoreModule extends AbstractModule {
     @Singleton
     public ConsensusServiceConfiguration getConsensusServiceConfiguration() {
         return ConsensusServiceConfiguration.builder()
+                .identity(IDENTITY.toString())
                 .faultThreshold(getFaultThreshold())
                 .isPrimary(isPrimary())
                 .akkaConfig(getAkkaConfig())

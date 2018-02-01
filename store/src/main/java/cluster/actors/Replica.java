@@ -139,6 +139,6 @@ public class Replica extends PubSubActor {
     }
 
     private boolean isFromLocalClient(String identity) {
-        return config.getIdentity().isSameIdentity(identity);
+        return config.getIdentity().equals(identity);
     }
 }

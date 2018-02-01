@@ -9,7 +9,7 @@ import model.Transaction;
 @Data
 @Builder
 public class ActorConfiguration {
-    private final Identity identity;
+    private final String identity;
     private final Consumer<Transaction> onConsensus;
     private final int faultThreshold;
 }
