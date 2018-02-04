@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+import static java.lang.String.format;
+
 public class ConsensusService {
 
     public static final String SYSTEM_NAME = "consensus-system";
@@ -23,9 +25,6 @@ public class ConsensusService {
     private final ConsensusServiceConfiguration config;
     private final TransactionBacklog transactionBacklog;
     private ActorSystem system;
-    private ActorRef primary;
-    private ActorRef replica;
-    private ActorRef client;
 
     @Inject
     public ConsensusService(
@@ -37,41 +36,84 @@ public class ConsensusService {
 
     public void start(Consumer<Transaction> onConsensus) {
         log.info("Starting akka system with config: {}", config);
+        if (config.isRunLocally()) {
+            startLocally(onConsensus);
+            return;
+        }
         ActorConfiguration actorConfig = ActorConfiguration.builder()
                 .faultThreshold(config.getFaultThreshold())
                 .identity(config.getIdentity())
+                .communityId(config.getCommunityId())
+                .finalCommunityId(config.getFinalCommunityId())
                 .onConsensus(onConsensus)
                 .build();
         system = ActorSystem.create(SYSTEM_NAME, config.getAkkaConfig());
         if (config.isPrimary()) {
-            startPrimary();
+            startPrimary(actorConfig);
         }
-        startClient(actorConfig);
+        ActorRef client = startClient(actorConfig);
         startReplica(actorConfig);
-        subscribeToBacklog();
+        subscribeToBacklog(client);
     }
 
-    private void startReplica(ActorConfiguration actorConfig) {
-        replica = system.actorOf(Props.create(
+    private ActorRef startReplica(ActorConfiguration actorConfig) {
+        return system.actorOf(Props.create(
                 Replica.class, () -> new Replica(actorConfig)),
-                Replica.ACTOR_NAME);
+                getActorName(Replica.ACTOR_NAME, actorConfig));
     }
 
-    private void startClient(ActorConfiguration actorConfig) {
-        client = system.actorOf(Props.create(
+    private ActorRef startClient(ActorConfiguration actorConfig) {
+        return system.actorOf(Props.create(
                 Client.class, () -> new Client(actorConfig)),
-                Client.ACTOR_NAME);
+                getActorName(Client.ACTOR_NAME, actorConfig));
     }
 
-    private void startPrimary() {
-       primary = system.actorOf(Props.create(Primary.class), Primary.ACTOR_NAME);
+    private ActorRef startPrimary(ActorConfiguration actorConfig) {
+       return system.actorOf(Props.create(
+               Primary.class, () -> new Primary(actorConfig)),
+               getActorName(Primary.ACTOR_NAME, actorConfig));
     }
 
-    private void subscribeToBacklog() {
+    private void subscribeToBacklog(ActorRef client) {
         transactionBacklog.subscribe(transaction -> {
             NewTransactionMessage newTransactionMessage = new NewTransactionMessage(
-                    transaction, config.getIdentity());
+                    transaction, config.getIdentity(), false);
             client.tell(newTransactionMessage, ActorRef.noSender());
         });
+    }
+
+    private String getActorName(String actorName, ActorConfiguration actorConfig) {
+        return format("%s-%d", actorName, actorConfig.getCommunityId());
+    }
+
+    /**
+     * Dev only for local testing
+     */
+    private void startLocally(Consumer<Transaction> onConsensus) {
+        log.info("Running locally with two communities");
+        ActorConfiguration finalConfig = ActorConfiguration.builder()
+                .faultThreshold(config.getFaultThreshold())
+                .identity(config.getIdentity())
+                .communityId(0)
+                .finalCommunityId(0)
+                .onConsensus(onConsensus)
+                .build();
+        ActorConfiguration actorConfig = ActorConfiguration.builder()
+                .faultThreshold(config.getFaultThreshold())
+                .identity(config.getIdentity())
+                .communityId(1)
+                .finalCommunityId(0)
+                .onConsensus(onConsensus)
+                .build();
+        system = ActorSystem.create(SYSTEM_NAME, config.getAkkaConfig());
+
+        startPrimary(actorConfig);
+        ActorRef actorClient = startClient(actorConfig);
+        startReplica(actorConfig);
+        subscribeToBacklog(actorClient);
+
+        startPrimary(finalConfig);
+        startClient(finalConfig);
+        startReplica(finalConfig);
     }
 }

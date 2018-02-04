@@ -17,8 +17,13 @@ public class CommitMessage implements Serializable {
     private int sequence;
     private Transaction transaction;
     private String identity;
+    private boolean isFinal;
 
     public static CommitMessage fromPreprepare(PrepareMessage prepare) {
-        return new CommitMessage(prepare.getSequence(), prepare.getTransaction(), prepare.getIdentity());
+        return new CommitMessage(
+                prepare.getSequence(),
+                prepare.getTransaction(),
+                prepare.getIdentity(),
+                prepare.isFinal());
     }
 }

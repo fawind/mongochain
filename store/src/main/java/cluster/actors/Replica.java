@@ -1,20 +1,21 @@
 package cluster.actors;
 
+import akka.cluster.pubsub.DistributedPubSubMediator.SubscribeAck;
 import cluster.ActorConfiguration;
 import cluster.messages.CommitMessage;
+import cluster.messages.LocalResultMessage;
 import cluster.messages.PrepareMessage;
 import cluster.messages.PreprepareMessage;
-import cluster.messages.ResultMessage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import static cluster.actors.Client.CLIENT_TOPIC;
+import static cluster.actors.Primary.PRIMARY_TOPIC;
 import static cluster.logging.Event.logEvent;
+import static cluster.logging.EventType.REPLICA_BROADCAST_RESULT;
 import static cluster.logging.EventType.REPLICA_CONSENSUS_RESULT;
-import static cluster.logging.EventType.REPLICA_INTEGRATE_RESULT;
 import static cluster.logging.EventType.REPLICA_NEW_COMMIT;
 import static cluster.logging.EventType.REPLICA_NEW_PREPARE;
 import static cluster.logging.EventType.REPLICA_NEW_RESULT;
@@ -30,14 +31,14 @@ public class Replica extends PubSubActor {
     private final List<PreprepareMessage> preprepareMessageLog = new ArrayList<>();
     private final List<PrepareMessage> prepareMessageLog = new ArrayList<>();
     private final List<CommitMessage> commitMessageLog = new ArrayList<>();
-    private final List<ResultMessage> resultLog = new ArrayList<>();
-    private final PriorityQueue<ResultMessage> pendingResults =
-            new PriorityQueue<>(10, Comparator.comparingInt(ResultMessage::getSequence));
+    private final List<LocalResultMessage> resultLog = new ArrayList<>();
+    private final PriorityQueue<LocalResultMessage> pendingResults =
+            new PriorityQueue<>(10, Comparator.comparingInt(LocalResultMessage::getSequence));
     private final ActorConfiguration config;
 
     public Replica(ActorConfiguration config) {
         this.config = config;
-        observe(REPLICA_TOPIC);
+        observe(REPLICA_TOPIC, config.getCommunityId());
     }
 
     @Override
@@ -46,43 +47,35 @@ public class Replica extends PubSubActor {
                 .match(PreprepareMessage.class, this::handlePreprepare)
                 .match(PrepareMessage.class, this::handlePrepare)
                 .match(CommitMessage.class, this::handleCommit)
+                .match(SubscribeAck.class, this::handleSubscribeAck)
                 .matchAny(m -> log().info("{} received unknown message: {}", getClass().getName(), m))
                 .build();
     }
 
     private void handlePreprepare(PreprepareMessage preprepare) {
-        if (isFromLocalClient(preprepare.getIdentity())) {
-            return;
-        }
         PrepareMessage prepare = PrepareMessage.fromPreprepare(preprepare);
         preprepareMessageLog.add(preprepare);
         prepareMessageLog.add(prepare);
         log().info(logEvent(REPLICA_NEW_PREPARE, prepare, getSelf()));
-        publish(REPLICA_TOPIC, prepare);
+        publish(REPLICA_TOPIC, config.getCommunityId(), prepare);
     }
 
     private void handlePrepare(PrepareMessage prepare) {
-        if (isFromLocalClient(prepare.getIdentity())) {
-            return;
-        }
         prepareMessageLog.add(prepare);
         log().info(logEvent(REPLICA_RECEIVE_PREPARE, prepare, getSelf()));
         if (isPrepared(prepare.getSequence())) {
             CommitMessage commit = CommitMessage.fromPreprepare(prepare);
             commitMessageLog.add(commit);
             log().info(logEvent(REPLICA_NEW_COMMIT, commit,getSelf()));
-            publish(REPLICA_TOPIC, commit);
+            publish(REPLICA_TOPIC, config.getCommunityId(), commit);
         }
     }
 
     private void handleCommit(CommitMessage commit) {
-        if (isFromLocalClient(commit.getIdentity())) {
-            return;
-        }
         log().info(logEvent(REPLICA_RECEIVE_COMMIT, commit, getSelf()));
         commitMessageLog.add(commit);
         if (isCommittedLocally(commit.getSequence())) {
-            ResultMessage result = ResultMessage.fromCommit(commit);
+            LocalResultMessage result = LocalResultMessage.fromCommit(commit);
             log().info(logEvent(REPLICA_NEW_RESULT, result, getSelf()));
             // TODO: Handle lost messages
             if (isNextResult(result)) {
@@ -94,27 +87,19 @@ public class Replica extends PubSubActor {
         }
     }
     
-    private void processValidatedResult(ResultMessage result) {
-        if (isFromLocalClient(result.getIdentity())) {
-            return;
-        }
+    private void processValidatedResult(LocalResultMessage result) {
         log().info(logEvent(REPLICA_CONSENSUS_RESULT, result, getSelf()));
         if (!resultLog.contains(result)) {
-            log().info(logEvent(REPLICA_INTEGRATE_RESULT, result, getSelf()));
-            try {
-                config.getOnConsensus().accept(result.getTransaction());
-            } catch (Exception e) {
-                log().error("Error emitting transaction with consensus", e);
-            }
+            log().info(logEvent(REPLICA_BROADCAST_RESULT, result, getSelf()));
+            publish(PRIMARY_TOPIC, config.getCommunityId(), result);
         }
         resultLog.add(result);
-        publish(CLIENT_TOPIC, result);
         // TODO: Save message timestamp for new min timestamps for filtering new transactions
     }
     
     private void processPendingResults() {
         while (!pendingResults.isEmpty() && isNextResult(pendingResults.peek())) {
-            ResultMessage result = pendingResults.poll();
+            LocalResultMessage result = pendingResults.poll();
             processValidatedResult(result);
         }
     }
@@ -125,7 +110,7 @@ public class Replica extends PubSubActor {
                 .filter(message -> message.getSequence() == sequence).count() >= config.getFaultThreshold();
     }
     
-    private boolean isNextResult(ResultMessage result) {
+    private boolean isNextResult(LocalResultMessage result) {
         if (resultLog.isEmpty()) {
             return result.getSequence() == 0;
         }
@@ -136,9 +121,5 @@ public class Replica extends PubSubActor {
         return isPrepared(sequence) &&
                 commitMessageLog.stream()
                         .filter(message -> message.getSequence() == sequence).count() >= config.getFaultThreshold();
-    }
-
-    private boolean isFromLocalClient(String identity) {
-        return config.getIdentity().equals(identity);
     }
 }

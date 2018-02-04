@@ -10,20 +10,20 @@ import model.Transaction;
 import java.io.Serializable;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Setter(AccessLevel.NONE)
-public class PrepareMessage implements Serializable {
+public class LocalResultMessage implements Serializable {
     private int sequence;
     private Transaction transaction;
     private String identity;
     private boolean isFinal;
 
-    public static PrepareMessage fromPreprepare(PreprepareMessage preprepare) {
-        return new PrepareMessage(
-                preprepare.getSequence(),
-                preprepare.getTransaction(),
-                preprepare.getIdentity(),
-                preprepare.isFinal());
+    public static LocalResultMessage fromCommit(CommitMessage commit) {
+        return new LocalResultMessage(
+                commit.getSequence(),
+                commit.getTransaction(),
+                commit.getIdentity(),
+                commit.isFinal());
     }
 }

@@ -25,19 +25,24 @@ public class DatastoreModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(DatastoreModule.class);
 
+    // Env Vars
     private static final String DOCKER_ENV = "STORE_ENV";
     private static final String PRIMARY_ENV = "PRIMARY";
     private static final String FAULT_THRESHOLD_ENV = "FAULT_THRESHOLD";
+    private static final String COMMUNITY_ID = "COMMUNITY_ID08022cas8";
+    // Akka config files
     private static final String AKKA_DOCKER_CONFIG = "applicationDocker.conf";
     private static final String AKKA_LOCAL_CONFIG = "applicationLocal.conf";
 
     private static final UUID IDENTITY = UUID.randomUUID();
+    private static final int FINAL_COMMUNITY_ID = 0;
 
     @Override
     protected void configure() {
         log.info("Is docker env: {}", isDockerEnv());
         log.info("Is primary: {}", isPrimary());
         log.info("Fault Threshold: {}", getFaultThreshold());
+        log.info("Community ID: {}", getCommunityId());
         bind(Datastore.class).to(IpfsDatastore.class).asEagerSingleton();
         bind(ContentAddressableStorage.class).to(IpfsStorage.class);
         bind(ConsensusService.class).asEagerSingleton();
@@ -59,7 +64,10 @@ public class DatastoreModule extends AbstractModule {
                 .identity(IDENTITY.toString())
                 .faultThreshold(getFaultThreshold())
                 .isPrimary(isPrimary())
+                .communityId(getCommunityId())
+                .finalCommunityId(getFinalCommunityId())
                 .akkaConfig(getAkkaConfig())
+                .runLocally(!isDockerEnv())
                 .build();
     }
 
@@ -82,6 +90,18 @@ public class DatastoreModule extends AbstractModule {
             return 0;
         }
         return Integer.parseInt(faultThreshold);
+    }
+
+    private int getCommunityId() {
+        String communityId = System.getenv(COMMUNITY_ID);
+        if (communityId == null) {
+            return 0;
+        }
+        return Integer.parseInt(communityId);
+    }
+
+    private int getFinalCommunityId() {
+        return FINAL_COMMUNITY_ID;
     }
     
     private boolean isDockerEnv() {

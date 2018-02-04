@@ -16,4 +16,5 @@ import java.io.Serializable;
 public class NewTransactionMessage implements Serializable {
     private Transaction transaction;
     private String identity;
+    private boolean isFinal;
 }

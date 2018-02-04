@@ -17,4 +17,13 @@ public class PreprepareMessage implements Serializable {
     private int sequence;
     private Transaction transaction;
     private String identity;
+    private boolean isFinal;
+
+    public static PreprepareMessage fromNewTransaction(int sequenceNumber, NewTransactionMessage message) {
+        return new PreprepareMessage(
+                sequenceNumber,
+                message.getTransaction(),
+                message.getIdentity(),
+                message.isFinal());
+    }
 }

@@ -13,12 +13,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter(AccessLevel.NONE)
-public class ResultMessage implements Serializable {
+public class GlobalResultMessage implements Serializable {
     private int sequence;
     private Transaction transaction;
     private String identity;
 
-    public static ResultMessage fromCommit(CommitMessage commit) {
-        return new ResultMessage(commit.getSequence(), commit.getTransaction(), commit.getIdentity());
+    public static GlobalResultMessage fromLocalResult(LocalResultMessage message) {
+        return new GlobalResultMessage(
+                message.getSequence(),
+                message.getTransaction(),
+                message.getIdentity());
     }
 }
