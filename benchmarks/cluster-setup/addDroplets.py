@@ -7,7 +7,7 @@ body = {
     'names': [],
     'region': 'fra1',
     'size': 's-1vcpu-1gb',
-    'image': '31529477',
+    'image': '31531910',
     'ssh_keys': [14240122, 18094769],
     'backups': False,
     'ipv6': False,
