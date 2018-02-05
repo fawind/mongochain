@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import json
 app = Flask(__name__)
 
 COMMUNITY_COUNT = 2
@@ -17,7 +18,7 @@ def get_state():
     counter += 1
     members.append({'ip': request.remote_addr, 'community_id': community_id,
                     'isPrimary': is_primary})
-    return '{},{}'.format(community_id, is_primary)
+    return '{},{}'.format(community_id, json.dumps(is_primary))
 
 
 @app.route("/members")
