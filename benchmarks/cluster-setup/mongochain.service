@@ -5,7 +5,7 @@ Description=Mongochain
 [Service]
 User=root
 WorkingDirectory=/home/akka
-ExecStart=/home/akka/workspace/mongochain/benchmarks/cluster-setup/start-akka.sh
+ExecStart=/home/akka/workspace/mongochain/benchmarks/cluster-setup/update-start.sh
 
 [Install]
 WantedBy=multi-user.target
