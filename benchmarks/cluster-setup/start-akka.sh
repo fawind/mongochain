@@ -20,5 +20,5 @@ export PUBLISH_HOST="0.0.0.0"
 export PUBLISH_PORT="2551"
 export SEED_NODE="akka.tcp://consensus-system@139.59.134.185:2551"
 
-/home/akka/workspace/mongochain/store/gradlew -p
-/home/akka/workspace/mongochain/store appRun | tee service.log
+/home/akka/workspace/mongochain/store/gradlew -p \
+        /home/akka/workspace/mongochain/store appRun | tee service.log
