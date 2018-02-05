@@ -32,6 +32,7 @@ integrationTest.mustRunAfter test
 
 gretty {
     httpPort = project.hasProperty("httpPort") ? project.httpPort as int : 9090
+    host = "0.0.0.0"
 }
 
 dependencies {
