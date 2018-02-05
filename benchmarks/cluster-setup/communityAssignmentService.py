@@ -1,25 +1,25 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
-COMMUNITIES = 2
-PRIMARIES = [True for _ in range(COMMUNITIES)]
+COMMUNITY_COUNT = 2
+primaries = [True for _ in range(COMMUNITY_COUNT)]
 counter = 0
-members = set()
+members = []
 
 
-@app.route("/getState")
+@app.route("/join")
 def get_state():
     global counter
     global members
-    members.add(request.remote_addr)
+    community_id = counter % COMMUNITY_COUNT
+    is_primary = primaries[community_id]
+    primaries[community_id] = False
     counter += 1
-    return_template = '{}, {}'
-    community = counter % COMMUNITIES
-    primary = PRIMARIES[community]
-    PRIMARIES[community] = False
-    return return_template.format(community, primary)
+    members.append({'ip': request.remote_addr, 'community_id': community_id,
+                    'isPrimary': is_primary})
+    return '{},{}'.format(community_id, is_primary)
 
 
-@app.route("/getMembers")
+@app.route("/members")
 def get_members():
-    return jsonify(list(members)), 200
+    return jsonify(members), 200
