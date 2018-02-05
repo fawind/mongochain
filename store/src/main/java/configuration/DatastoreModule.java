@@ -17,6 +17,7 @@ import io.ipfs.api.IPFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import storage.ContentAddressableStorage;
+import storage.DummyIpfsStorage;
 import storage.IpfsStorage;
 
 import java.util.UUID;
@@ -29,7 +30,8 @@ public class DatastoreModule extends AbstractModule {
     private static final String DOCKER_ENV = "STORE_ENV";
     private static final String PRIMARY_ENV = "PRIMARY";
     private static final String FAULT_THRESHOLD_ENV = "FAULT_THRESHOLD";
-    private static final String COMMUNITY_ID = "COMMUNITY_ID08022cas8";
+    private static final String COMMUNITY_ID = "COMMUNITY_ID";
+    private static final String MOCK_IPFS = "MOCK_IPFS";
     // Akka config files
     private static final String AKKA_DOCKER_CONFIG = "applicationDocker.conf";
     private static final String AKKA_LOCAL_CONFIG = "applicationLocal.conf";
@@ -44,7 +46,6 @@ public class DatastoreModule extends AbstractModule {
         log.info("Fault Threshold: {}", getFaultThreshold());
         log.info("Community ID: {}", getCommunityId());
         bind(Datastore.class).to(IpfsDatastore.class).asEagerSingleton();
-        bind(ContentAddressableStorage.class).to(IpfsStorage.class);
         bind(ConsensusService.class).asEagerSingleton();
         bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class).in(Singleton.class);
         bind(TransactionBacklog.class).in(Singleton.class);
@@ -53,8 +54,12 @@ public class DatastoreModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public IPFS getIpfsService() {
-        return new IPFSLoader().getIPFS(isDockerEnv());
+    public ContentAddressableStorage getContentAddressableStorage() {
+        String isMockIpfs = System.getenv(MOCK_IPFS);
+        if (isMockIpfs != null && isMockIpfs.equals("true")) {
+            return new DummyIpfsStorage();
+        }
+        return new IpfsStorage(getIpfsService());
     }
 
     @Provides
@@ -69,6 +74,10 @@ public class DatastoreModule extends AbstractModule {
                 .akkaConfig(getAkkaConfig())
                 .runLocally(!isDockerEnv())
                 .build();
+    }
+
+    private IPFS getIpfsService() {
+        return new IPFSLoader().getIPFS(isDockerEnv());
     }
 
     private Config getAkkaConfig() {
