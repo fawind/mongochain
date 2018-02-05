@@ -25,6 +25,10 @@ def get_state():
 def get_members():
     return jsonify(members), 200
 
+@app.route("/members/count")
+def get_members():
+    return len(members), 200
+
 @app.route("/clear")
 def clear():
     global counter
