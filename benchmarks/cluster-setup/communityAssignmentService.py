@@ -27,7 +27,7 @@ def get_members():
 
 @app.route("/members/count")
 def get_members_count():
-    return len(members), 200
+    return jsonify({'members': len(members)}), 200
 
 @app.route("/clear")
 def clear():
