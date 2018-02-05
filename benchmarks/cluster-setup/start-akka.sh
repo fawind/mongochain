@@ -22,6 +22,7 @@ export PUBLISH_PORT="2551"
 export SEED_NODE1="akka.tcp://consensus-system@139.59.134.185:2551"
 export SEED_NODE2="akka.tcp://consensus-system@165.227.153.129:2551"
 
+rm -rf /home/akka/workspace/mongochain/store/build
 /home/akka/workspace/mongochain/store/gradlew -p \
         /home/akka/workspace/mongochain/store buildProduct
 
