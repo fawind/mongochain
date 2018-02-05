@@ -1,9 +1,9 @@
 # Change this url to the corresponding state server url
-RESP=$(curl localhost:5000/getState)
+RESP=$(curl 139.59.134.185:5000/join)
 
 echo RESP $RESP
 
-IFS=', ' read -ra STATE <<< "$RESP"
+IFS=',' read -ra STATE <<< "$RESP"
 
 COMMUNITY_ID=${STATE[0]}
 PRIMARY=${STATE[1]}
