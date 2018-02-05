@@ -1,3 +1,4 @@
+#!/bin/bash
 # Change this url to the corresponding state server url
 RESP=$(curl 139.59.134.185:5000/join)
 

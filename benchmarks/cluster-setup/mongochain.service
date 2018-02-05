@@ -1,0 +1,11 @@
+# Copy to /usr/lib/systemd/system/mongochain.service 
+[Unit]
+Description=Mongochain
+
+[Service]
+User=akka
+WorkingDirectory=/home/akka
+ExecStart=/home/akka/workspace/mongochain/benchmarks/cluster-setup/start-akka.sh
+
+[Install]
+WantedBy=multi-user.target
