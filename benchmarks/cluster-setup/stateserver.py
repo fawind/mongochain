@@ -13,5 +13,5 @@ def get_state():
     return_template = '{}, {}'
     community = COUNTER % COMMUNITIES
     primary = PRIMARIES[community]
-    PRIMARIES[community] = PRIMARIES[community] and False
+    PRIMARIES[community] = False
     return return_template.format(community, primary)
