@@ -24,3 +24,13 @@ def get_state():
 @app.route("/members")
 def get_members():
     return jsonify(members), 200
+
+@app.route("/clear")
+def clear():
+    global counter
+    global members
+    global primaries
+    primaries = [True for _ in range(COMMUNITY_COUNT)]
+    counter = 0
+    members = []
+    return 'cleared', 200
