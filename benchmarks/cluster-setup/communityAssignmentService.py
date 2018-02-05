@@ -18,7 +18,7 @@ def get_state():
     counter += 1
     members.append({'ip': request.remote_addr, 'community_id': community_id,
                     'isPrimary': is_primary})
-    return '{},{}'.format(community_id, json.dumps(is_primary))
+    return '{};{},{}'.format(community_id, request.remote_addr, json.dumps(is_primary))
 
 
 @app.route("/members")
