@@ -10,7 +10,7 @@ FILE_NAME = '{}.log'
 
 
 def main():
-    members = [m for m in requests.get(URL).json() if m['community_id'] != 0]
+    members = [m for m in requests.get(URL).json()]
     for mem in members:
         copy_file(mem['ip'])
 
