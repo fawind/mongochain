@@ -4,8 +4,8 @@ from os.path import dirname, realpath
 
 
 URL = 'http://139.59.134.185:5000/members'
-OUTPUT_DIR = dirname(realpath(__file__)) + '/results/'
-REMOTE_PATH = '~/service.log'
+OUTPUT_DIR = dirname(realpath(__file__)) + '/logs/'
+REMOTE_PATH = '/home/akka/mongochain.log'
 FILE_NAME = '{}.log'
 
 
