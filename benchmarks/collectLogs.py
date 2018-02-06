@@ -19,7 +19,7 @@ def copy_file(ip):
     print(ip)
     file_name = FILE_NAME.format(ip)
     output_dir = OUTPUT_DIR + file_name
-    scp_stmnt = 'scp akka@{}:{} {}'.format(ip, REMOTE_PATH, output_dir)
+    scp_stmnt = 'scp -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null akka@{}:{} {}'.format(ip, REMOTE_PATH, output_dir)
     os.system(scp_stmnt)
 
 
