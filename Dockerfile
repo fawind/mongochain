@@ -1,9 +1,8 @@
 FROM java:openjdk-8-alpine
 
-ADD ./store/build/output/store .
+ADD . /home/akka/workspace/mongochain/
 
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.0.0/wait /wait
-RUN chmod +x /wait
 RUN apk add --update bash && rm -rf /var/cache/apk/*
+RUN apk add --no-cache curl
 
-CMD /wait && ./start.sh
+CMD /home/akka/workspace/mongochain/benchmarks/cluster-setup/start-akka.sh
