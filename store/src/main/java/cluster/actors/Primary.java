@@ -47,7 +47,7 @@ public class Primary extends PubSubActor {
 
     private void handleIncomingTransaction(NewTransactionMessage newTransaction) {
         PreprepareMessage preprepare = PreprepareMessage.fromNewTransaction(sequenceNumber++, newTransaction);
-        log().info(logEvent(PRIMARY_NEW_PREPREPARE, preprepare, getSelf()));
+//        log().info(logEvent(PRIMARY_NEW_PREPREPARE, preprepare, getSelf()));
         publish(REPLICA_TOPIC, config.getCommunityId(), preprepare);
         messageLog.add(preprepare);
     }
@@ -56,7 +56,7 @@ public class Primary extends PubSubActor {
         if (localResultMessages.contains(localResult)) {
             return;
         }
-        log().info(logEvent(PRIMARY_RECEIVE_LOCAL_RESULT, localResult, getSelf()));
+//        log().info(logEvent(PRIMARY_RECEIVE_LOCAL_RESULT, localResult, getSelf()));
         localResultMessages.add(localResult);
         if (!localResult.isFinal()) {
            broadcastToFinalCommunity(localResult);
@@ -66,14 +66,14 @@ public class Primary extends PubSubActor {
     }
 
     private void broadcastToFinalCommunity(LocalResultMessage localResult) {
-        log().info(logEvent(PRIMARY_BROADCAST_TO_FINAL, localResult, getSelf()));
+//        log().info(logEvent(PRIMARY_BROADCAST_TO_FINAL, localResult, getSelf()));
         NewTransactionMessage newTransaction = new NewTransactionMessage(
                 localResult.getTransaction(), localResult.getIdentity(), true);
         publish(PRIMARY_TOPIC, config.getFinalCommunityId(), newTransaction);
     }
 
     private void broadcastGlobalResult(LocalResultMessage localResult) {
-        log().info(logEvent(PRIMARY_BROADCAST_GLOBAL_RESULT, localResult, getSelf()));
+//        log().info(logEvent(PRIMARY_BROADCAST_GLOBAL_RESULT, localResult, getSelf()));
         GlobalResultMessage globalResult = GlobalResultMessage.fromLocalResult(localResult);
         publish(CLIENT_TOPIC, globalResult);
     }

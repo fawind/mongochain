@@ -22,7 +22,7 @@ public interface StoreService {
 
     @Path("{key}/{value}")
     @GET
-    Response setValue(
+    String setValue(
             @PathParam("namespace") String namespace,
             @PathParam("key") String key,
             @PathParam("value") String value);

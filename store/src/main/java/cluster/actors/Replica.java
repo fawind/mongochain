@@ -56,27 +56,27 @@ public class Replica extends PubSubActor {
         PrepareMessage prepare = PrepareMessage.fromPreprepare(preprepare);
         preprepareMessageLog.add(preprepare);
         prepareMessageLog.add(prepare);
-        log().info(logEvent(REPLICA_NEW_PREPARE, prepare, getSelf()));
+//        log().info(logEvent(REPLICA_NEW_PREPARE, prepare, getSelf()));
         publish(REPLICA_TOPIC, config.getCommunityId(), prepare);
     }
 
     private void handlePrepare(PrepareMessage prepare) {
         prepareMessageLog.add(prepare);
-        log().info(logEvent(REPLICA_RECEIVE_PREPARE, prepare, getSelf()));
+//        log().info(logEvent(REPLICA_RECEIVE_PREPARE, prepare, getSelf()));
         if (isPrepared(prepare.getSequence())) {
             CommitMessage commit = CommitMessage.fromPreprepare(prepare);
             commitMessageLog.add(commit);
-            log().info(logEvent(REPLICA_NEW_COMMIT, commit,getSelf()));
+//            log().info(logEvent(REPLICA_NEW_COMMIT, commit,getSelf()));
             publish(REPLICA_TOPIC, config.getCommunityId(), commit);
         }
     }
 
     private void handleCommit(CommitMessage commit) {
-        log().info(logEvent(REPLICA_RECEIVE_COMMIT, commit, getSelf()));
+//        log().info(logEvent(REPLICA_RECEIVE_COMMIT, commit, getSelf()));
         commitMessageLog.add(commit);
         if (isCommittedLocally(commit.getSequence())) {
             LocalResultMessage result = LocalResultMessage.fromCommit(commit);
-            log().info(logEvent(REPLICA_NEW_RESULT, result, getSelf()));
+//            log().info(logEvent(REPLICA_NEW_RESULT, result, getSelf()));
             // TODO: Handle lost messages
             if (isNextResult(result)) {
                 processValidatedResult(result);
@@ -88,9 +88,9 @@ public class Replica extends PubSubActor {
     }
     
     private void processValidatedResult(LocalResultMessage result) {
-        log().info(logEvent(REPLICA_CONSENSUS_RESULT, result, getSelf()));
+//        log().info(logEvent(REPLICA_CONSENSUS_RESULT, result, getSelf()));
         if (!resultLog.contains(result)) {
-            log().info(logEvent(REPLICA_BROADCAST_RESULT, result, getSelf()));
+//            log().info(logEvent(REPLICA_BROADCAST_RESULT, result, getSelf()));
             publish(PRIMARY_TOPIC, config.getCommunityId(), result);
         }
         resultLog.add(result);

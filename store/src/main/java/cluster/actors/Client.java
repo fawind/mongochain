@@ -38,7 +38,7 @@ public class Client extends PubSubActor {
     }
 
     private void handleNewTransaction(NewTransactionMessage newTransaction) {
-        log().info(logEvent(CLIENT_NEW_TRANSACTION, newTransaction, getSelf()));
+//        log().info(logEvent(CLIENT_NEW_TRANSACTION, newTransaction, getSelf()));
         publish(PRIMARY_TOPIC, config.getCommunityId(), newTransaction);
     }
 
@@ -46,7 +46,7 @@ public class Client extends PubSubActor {
         if (globalResults.contains(globalResult)) {
             return;
         }
-        log().info(logEvent(CLIENT_INTEGRATE_GLOBAL_RESULT, globalResult, getSelf()));
+//        log().info(logEvent(CLIENT_INTEGRATE_GLOBAL_RESULT, globalResult, getSelf()));
         globalResults.add(globalResult);
         try {
             config.getOnConsensus().accept(globalResult.getTransaction());

@@ -96,7 +96,7 @@ public class ConsensusService {
                 .identity(config.getIdentity())
                 .communityId(0)
                 .finalCommunityId(0)
-                .onConsensus(onConsensus)
+                .onConsensus((transaction -> {}))
                 .build();
         ActorConfiguration actorConfig = ActorConfiguration.builder()
                 .faultThreshold(config.getFaultThreshold())

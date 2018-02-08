@@ -5,6 +5,8 @@ import index.ContentHashIndex;
 import model.DatastoreException;
 import model.Key;
 import model.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import storage.ContentAddressableStorage;
 
 import javax.inject.Inject;
@@ -14,6 +16,8 @@ import static java.lang.String.format;
 
 
 public class IpfsDatastore implements Datastore {
+
+
 
     private final ContentAddressableStorage storage;
     private final ContentHashIndex index;

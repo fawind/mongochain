@@ -48,8 +48,8 @@ public class DatastoreModule extends AbstractModule {
         bind(Datastore.class).to(IpfsDatastore.class).asEagerSingleton();
         bind(ConsensusService.class).asEagerSingleton();
         bind(ContentHashIndex.class).to(InMemoryContentHashIndex.class).in(Singleton.class);
-        bind(TransactionBacklog.class).in(Singleton.class);
-        bind(SecuredTransactionLog.class).in(Singleton.class);
+        bind(TransactionBacklog.class).asEagerSingleton();
+        bind(SecuredTransactionLog.class).asEagerSingleton();
     }
 
     @Provides

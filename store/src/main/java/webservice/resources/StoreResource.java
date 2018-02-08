@@ -7,6 +7,7 @@ import model.Key;
 import webservice.api.StoreService;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
@@ -32,13 +33,13 @@ public class StoreResource implements StoreService {
     }
 
     @Override
-    public Response setValue(String namespace, String key, String value) {
+    public String setValue(String namespace, String key, String value) {
         try {
             datastore.add(new Key(namespace, key), value);
-            return Response.ok().build();
+            return "Accepted";
         } catch (DatastoreException e) {
             e.printStackTrace();
-            return Response.serverError().build();
+            throw new WebApplicationException(e);
         }
     }
 
