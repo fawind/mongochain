@@ -20,9 +20,11 @@ def get_random_string():
 
 
 def run_tests(members, wait_single=0, wait_run=0):
+    rounds = 1
     number_of_puts = 0
     try:
         while True:
+            print('Start round: {}'.format(rounds))
             for host in members:
                 key = get_random_string()
                 value = get_random_string()
@@ -34,6 +36,7 @@ def run_tests(members, wait_single=0, wait_run=0):
                 sleep(wait_single)
             print(f'Sleep between runs for {wait_run} sec...\n')
             sleep(wait_run)
+            rounds += 1
     except KeyboardInterrupt:
         print(f'Finished. Total number of puts: {number_of_puts}')
 
