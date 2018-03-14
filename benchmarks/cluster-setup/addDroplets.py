@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import json
 import requests
 
@@ -15,6 +16,8 @@ body = {
     'tags': ['akka-node']
 }
 
+CHUNK_SIZE = 10
+
 print(sys.argv)
 token = os.environ.get('TOKEN')
 num_nodes = int(sys.argv[1])
@@ -27,8 +30,19 @@ print('Num of nodes: {}, Start Index: {}'.format(num_nodes, start_index))
 for i in range(start_index, start_index + num_nodes):
     name = 'akka-node-{}'.format(i)
     body['names'].append(name)
+    if len(body['names']) == CHUNK_SIZE:
+        print(body)
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer {}'.format(token)}
+        response = requests.post('https://api.digitalocean.com/v2/droplets',
+                data=json.dumps(body), headers=headers)
+        print(response.json())
+        body['names'] = []
+        time.sleep(2)
+        print('\n')
 
-print(body)
-headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer {}'.format(token)}
-response = requests.post('https://api.digitalocean.com/v2/droplets', data=json.dumps(body), headers=headers)
-print(response.json())
+if len(body['names']) > 0:
+    print(body)
+    headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer {}'.format(token)}
+    response = requests.post('https://api.digitalocean.com/v2/droplets',
+            data=json.dumps(body), headers=headers)
+    print(response.json())
