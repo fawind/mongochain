@@ -18,7 +18,7 @@ export COMMUNITY_ID=$COMMUNITY_ID
 
 export STORE_ENV="docker"
 export MOCK_IPFS="true"
-export FAULT_THRESHOLD="1"
+export FAULT_THRESHOLD="0"
 export PUBLISH_HOST=$IP
 export PUBLISH_PORT="2551"
 export SEED_NODE1="akka.tcp://consensus-system@139.59.134.185:2551"
