@@ -1,11 +1,11 @@
-#### joe made this: http://goel.io/joe
-
-#####=== Python ===#####
-
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+
+# logs
+logs
+*.log
 
 # C extensions
 *.so

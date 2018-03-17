@@ -1,0 +1,8 @@
+FROM java:openjdk-8-alpine
+
+ADD . /home/akka/workspace/mongochain/
+
+RUN apk add --update bash && rm -rf /var/cache/apk/*
+RUN apk add --no-cache curl
+
+CMD /home/akka/workspace/mongochain/start-akka.sh 139.59.134.185 139.59.134.185 165.227.153.129
