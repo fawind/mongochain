@@ -3,11 +3,11 @@ import re
 import pandas as pd
 
 # parses all needed values to groups, except Client logs
-one_regex_to_rule_them_all =\
+EVENT_LOG_RE =\
     '(?P<timestamp>\d{1,2}:\d{1,2}:\d{1,2}[,]?\d{1,3}) (?P<node_type>\w+):\d* - Event:(?P<event_type>\w+).*/user/consensus-\w+-(?P<community_id>\d+).*\((sequence=(?P<sequence_number>\d*)|transaction).*contentHash=(?P<content_hash>\w+)\).*identity=(?P<node_id>[^\|^,)]*)'
 
 def parse_log_line(line):
-    match = re.search(one_regex_to_rule_them_all, line)
+    match = re.search(EVENT_LOG_RE, line)
     if match:
         return match.groupdict()
     return
